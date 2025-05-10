@@ -11,15 +11,16 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Objects.*;
 
+@Service
 @RequiredArgsConstructor
 class TokenServiceImpl implements TokenService {
 
@@ -40,7 +41,7 @@ class TokenServiceImpl implements TokenService {
                 .claim("iat", Date.from(iat))
                 .claim("token_uuid", userAuthenticated.getTokenUuid().toString())
                 .claim("token_usage", TokenUsageType.ACCESS_TOKEN.name())
-                .claim("userId", userAuthenticated.getId())
+                .claim("userId", userAuthenticated.getUserId())
                 .claim("roles", userAuthenticated.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
         jwtBuilder.signWith(getSecretKey());
         return jwtBuilder.compact();
@@ -65,17 +66,13 @@ class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public boolean isValidToken(String token, TokenUsageType expectedTokenType) {
+    public boolean isValidToken(String token) {
         try {
-            if (isNull(token) || isNull(expectedTokenType)) {
+            if (isNull(token)) {
                 return false;
             }
             Claims claims = parseClaims(token);
             if (isNull(claims) || isNull(claims.getSubject())) {
-                return false;
-            }
-            var tokenUsage = claims.get("token_usage");
-            if (!Objects.equals(expectedTokenType, TokenUsageType.toEnum(tokenUsage))) {
                 return false;
             }
             var tokenUuid = claims.get("token_uuid").toString();
@@ -119,6 +116,16 @@ class TokenServiceImpl implements TokenService {
         }
         String uuidString = claims.get("token_uuid").toString();
         return UUID.fromString(uuidString);
+    }
+
+    @Override
+    public TokenUsageType extractTokenUsageType(String token) {
+        var claims = parseClaims(token);
+        if (isNull(claims)) {
+            return null;
+        }
+        Object tokenUsageClaim = claims.get("token_usage");
+        return TokenUsageType.toEnum(tokenUsageClaim);
     }
 
     private SecretKey getSecretKey() {

@@ -13,7 +13,7 @@ public interface TokenService {
 
     String generateRefreshToken(UserDetails userDetails);
 
-    boolean isValidToken(String token, TokenUsageType expectedTokenType);
+    boolean isValidToken(String token);
 
     Claims parseClaims(String token);
 
@@ -22,5 +22,7 @@ public interface TokenService {
     Date extractExpiration(String token);
 
     UUID extractTokenUuid(String token);
+
+    TokenUsageType extractTokenUsageType(String token);
 
 }

@@ -18,7 +18,7 @@ import java.util.UUID;
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "${auth.database.users-table-name}", schema = "${auth.database.schema-name}")
+@Table(name = "users", schema = "auth")
 public class User implements Serializable {
 
     @EqualsAndHashCode.Include
@@ -40,8 +40,8 @@ public class User implements Serializable {
     private Instant updatedAt;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
-            name = "${auth.database.users-roles-table-name}",
-            schema = "${auth.database.schema-name}",
+            name = "users_roles",
+            schema = "auth",
             joinColumns = @JoinColumn(name = "user_id")
     )
     @Column(name = "role")

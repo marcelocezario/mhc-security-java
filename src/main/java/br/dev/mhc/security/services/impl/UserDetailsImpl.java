@@ -2,7 +2,6 @@ package br.dev.mhc.security.services.impl;
 
 import br.dev.mhc.security.entities.User;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,10 +9,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
+
 public class UserDetailsImpl implements UserDetails {
 
     @Getter
-    private final UUID id;
+    private final UUID tokenUuid;
     @Getter
     private final User user;
     private final String username;
@@ -21,14 +22,10 @@ public class UserDetailsImpl implements UserDetails {
     private final boolean active;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    @Getter
-    @Setter
-    private UUID tokenUuid;
-
-    public UserDetailsImpl(User user) {
+    public UserDetailsImpl(User user, UUID tokenUuid) {
         super();
+        this.tokenUuid = tokenUuid;
         this.user = user;
-        id = user.getId();
         username = user.getUsername();
         password = user.getPassword();
         active = user.isActive();
@@ -53,5 +50,9 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return active;
+    }
+
+    public UUID getUserId() {
+        return nonNull(user) ? user.getId() : null;
     }
 }

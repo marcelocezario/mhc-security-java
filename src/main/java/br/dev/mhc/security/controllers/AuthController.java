@@ -1,5 +1,6 @@
 package br.dev.mhc.security.controllers;
 
+import br.dev.mhc.security.constants.RouteConstants;
 import br.dev.mhc.security.dtos.CredentialsDTO;
 import br.dev.mhc.security.dtos.RefreshTokenRequestDTO;
 import br.dev.mhc.security.dtos.TokenResponseDTO;
@@ -11,14 +12,16 @@ import org.springframework.web.bind.annotation.*;
 import static java.util.Objects.isNull;
 
 @RestController
-@RequestMapping(value = "${auth.controller.path}")
+@RequestMapping(value = RouteConstants.AUTH_ROUTE)
 public record AuthController(
         AuthService authService
 ) {
 
     @PostMapping(value = "/login")
     public ResponseEntity<TokenResponseDTO> login(@RequestBody CredentialsDTO credentialsDTO) {
-        throw new RuntimeException("Method not implemented, added only for swagger configuration, application must use default spring security call");
+        var authenticate = authService.authenticate(credentialsDTO);
+        var tokenResponse = authService.generateTokenResponse(authenticate);
+        return ResponseEntity.ok(tokenResponse);
     }
 
     @PostMapping(value = "/refresh-token")
@@ -29,12 +32,16 @@ public record AuthController(
 
         String refreshToken = authorizationHeader.replace("Bearer ", "").trim();
 
-        var refreshTokenRequest = RefreshTokenRequestDTO.builder()
-                .refreshToken(refreshToken)
-                .build();
+        var refreshTokenRequest = new RefreshTokenRequestDTO(refreshToken);
 
         var token = authService.refreshToken(refreshTokenRequest);
         return ResponseEntity.ok(token);
+    }
+
+    @PostMapping(value = "/logout")
+    public ResponseEntity<Void> logout() {
+        authService.logout();
+        return ResponseEntity.noContent().build();
     }
 
 }

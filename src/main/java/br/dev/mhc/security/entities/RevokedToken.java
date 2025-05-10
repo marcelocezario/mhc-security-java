@@ -17,17 +17,16 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
-@Table
+@Table(name = "revoked_tokens", schema = "auth")
 public class RevokedToken implements Serializable {
 
     @Id
     @Column(name = "token_uuid", nullable = false)
     private UUID tokenUuid;
-    @Column(name = "user_id", nullable = false)private UUID userId;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
     @CreationTimestamp
     @Column(name = "revoked_at", nullable = false, updatable = false)
     private Instant revokedAt;
-    @Column(name = "expires_at", nullable = false)
-    private Instant expiresAt;
 
 }
