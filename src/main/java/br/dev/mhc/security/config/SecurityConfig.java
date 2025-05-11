@@ -40,17 +40,17 @@ public class SecurityConfig {
 
         var authManager = authenticationManager(httpSecurity);
 
-        httpSecurity
+        return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sessionManagement ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/login").permitAll()
                         .anyRequest().authenticated())
-                .addFilter(new JWTAuthenticationFilter(authManager, authService, objectMapper))
+                .addFilter(new JWTAuthenticationFilter(authService, objectMapper))
                 .addFilter(new JWTAuthorizationFilter(authManager, authService, tokenService))
                 .authenticationManager(authenticationManager(httpSecurity))
-        ;
-        return httpSecurity.build();
+                .build();
     }
 
     private void applyTestProfileSecuritySettings(HttpSecurity httpSecurity) throws Exception {
