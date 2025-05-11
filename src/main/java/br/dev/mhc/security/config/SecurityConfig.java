@@ -1,5 +1,6 @@
 package br.dev.mhc.security.config;
 
+import br.dev.mhc.security.constants.RouteConstants;
 import br.dev.mhc.security.filters.JWTAuthenticationFilter;
 import br.dev.mhc.security.filters.JWTAuthorizationFilter;
 import br.dev.mhc.security.services.AuthService;
@@ -33,6 +34,13 @@ public class SecurityConfig {
     private final TokenService tokenService;
     private final ObjectMapper objectMapper;
 
+    private final static String[] PUBLIC_MATCHERS = {
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            RouteConstants.AUTH_ROUTE + "/login"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
@@ -45,7 +53,7 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers(PUBLIC_MATCHERS).permitAll()
                         .anyRequest().authenticated())
                 .addFilter(new JWTAuthenticationFilter(authService, objectMapper))
                 .addFilter(new JWTAuthorizationFilter(authManager, authService, tokenService))
